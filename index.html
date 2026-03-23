@@ -3,752 +3,223 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RT4K Decimation Calculator</title>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>RetroTINK-4K Decimation & Trim Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=DM+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f0f4f8;
-    --surface: #ffffff;
-    --surface-2: #f8fafc;
-    --border: #dde3ec;
-    --border-strong: #c4cdd9;
-    --text: #0f1d2e;
-    --text-2: #4a5a6e;
-    --text-3: #7a8a9a;
-    --accent: #1a5fa8;
-    --accent-light: #e8f1fb;
-    --accent-mid: #5b9bd6;
-    --green: #0d7a4e;
-    --green-bg: #e6f5ef;
-    --amber: #92580a;
-    --amber-bg: #fdf3e3;
-    --red: #b91c1c;
-    --red-bg: #fef2f2;
+    --bg: #f0f4f8; --surface: #ffffff; --surface-2: #f8fafc; --border: #dde3ec;
+    --text: #0f1d2e; --text-2: #4a5a6e; --text-3: #7a8a9a; --accent: #1a5fa8;
+    --accent-light: #e8f1fb; --accent-mid: #5b9bd6; --amber: #92580a; --amber-bg: #fdf3e3;
     --shadow: 0 1px 3px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.05);
-    --shadow-lg: 0 2px 8px rgba(0,0,0,0.08), 0 8px 32px rgba(0,0,0,0.07);
-    --radius: 10px;
-    --radius-sm: 6px;
+    --radius: 10px; --radius-sm: 6px;
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text); padding: 40px 20px 80px; }
+  .page-wrap { max-width: 700px; margin: 0 auto; }
 
-  body {
-    font-family: 'Outfit', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    font-size: 16px;
-    line-height: 1.5;
-    min-height: 100vh;
-    padding: 40px 20px 80px;
-  }
+  .page-header { margin-bottom: 36px; text-align: center; }
+  .page-header h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; }
+  .page-header h1 span { color: var(--accent); }
+  .page-header p { color: var(--text-2); font-size: 15px; margin-top: 8px; }
 
-  .page-wrap {
-    max-width: 860px;
-    margin: 0 auto;
-  }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px 32px; margin-bottom: 24px; box-shadow: var(--shadow); }
 
-  /* ── Header ── */
-  .page-header {
-    margin-bottom: 36px;
-  }
-  .page-header h1 {
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--text);
-    letter-spacing: -0.02em;
-  }
-  .page-header h1 span {
-    color: var(--accent);
-  }
-  .page-header p {
-    color: var(--text-2);
-    font-size: 15px;
-    margin-top: 4px;
-  }
+  .preset-section { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
+  .preset-section label { font-size: 14px; font-weight: 600; color: var(--text-2); }
+  .preset-section select { font-family: 'Outfit', sans-serif; font-size: 16px; background: var(--surface-2); border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 12px; cursor: pointer; outline: none; }
 
-  /* ── Preset bar ── */
-  .preset-bar {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 14px 20px;
-    margin-bottom: 28px;
-    box-shadow: var(--shadow);
-  }
-  .preset-bar label {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text-2);
-    white-space: nowrap;
-  }
-  .preset-bar select {
-    flex: 1;
-    font-family: 'Outfit', sans-serif;
-    font-size: 15px;
-    color: var(--text-3);
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 8px 12px;
-    cursor: not-allowed;
-  }
-  .preset-badge {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--amber);
-    background: var(--amber-bg);
-    padding: 3px 10px;
-    border-radius: 20px;
-    white-space: nowrap;
-  }
+  .notes-box { background: var(--accent-light); border: 1px solid #b8d4ef; border-radius: var(--radius-sm); padding: 12px 16px; font-size: 14px; color: #1a3a5c; margin-top: 12px; display: none; line-height: 1.4; }
 
-  /* ── Cards ── */
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 28px 32px;
-    margin-bottom: 24px;
-    box-shadow: var(--shadow);
-  }
-  .card-header {
-    display: flex;
-    align-items: baseline;
-    gap: 10px;
-    margin-bottom: 22px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--border);
-  }
-  .card-step {
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--accent);
-    background: var(--accent-light);
-    padding: 2px 10px;
-    border-radius: 20px;
-  }
-  .card-title {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--text);
-    letter-spacing: -0.01em;
-  }
+  .warn-box { background: var(--amber-bg); border: 1px solid #e8c97a; border-radius: var(--radius-sm); padding: 12px 16px; font-size: 13px; color: var(--amber); margin-bottom: 24px; line-height: 1.5; }
 
-  /* ── Info boxes ── */
-  .info-box {
-    background: var(--accent-light);
-    border: 1px solid #b8d4ef;
-    border-radius: var(--radius-sm);
-    padding: 14px 18px;
-    font-size: 14px;
-    color: #1a3a5c;
-    line-height: 1.6;
-    margin-bottom: 20px;
-  }
-  .info-box strong { font-weight: 600; }
-  .aux-buttons {
-    display: inline-flex;
-    gap: 8px;
-    margin: 8px 0 2px;
-  }
-  .aux-btn {
-    font-family: 'DM Mono', monospace;
-    font-size: 13px;
-    font-weight: 500;
-    background: var(--accent);
-    color: #fff;
-    padding: 3px 10px;
-    border-radius: var(--radius-sm);
-    display: inline-block;
-  }
-  .warn-box {
-    background: var(--amber-bg);
-    border: 1px solid #e8c97a;
-    border-radius: var(--radius-sm);
-    padding: 12px 16px;
-    font-size: 13.5px;
-    color: var(--amber);
-    line-height: 1.55;
-    margin-top: 16px;
-  }
-
-  /* ── Form elements ── */
-  .field-row {
-    display: grid;
-    gap: 16px;
-    margin-bottom: 16px;
-  }
-  .field-row.cols-2 { grid-template-columns: 1fr 1fr; }
-  .field-row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
-  .field-row.cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
-  @media (max-width: 600px) {
-    .field-row.cols-2, .field-row.cols-3, .field-row.cols-4 { grid-template-columns: 1fr 1fr; }
-  }
-  @media (max-width: 400px) {
-    .field-row.cols-2, .field-row.cols-3, .field-row.cols-4 { grid-template-columns: 1fr; }
-  }
-
+  .section-label { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); margin: 20px 0 12px; border-bottom: 1px solid var(--accent-light); padding-bottom: 6px; }
+  .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 20px; margin-bottom: 8px; }
   .field { display: flex; flex-direction: column; gap: 6px; }
-  .field label {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-2);
-    letter-spacing: 0.01em;
-  }
-  .field .sublabel {
-    font-size: 12px;
-    font-weight: 400;
-    color: var(--text-3);
-    margin-top: -2px;
-    line-height: 1.4;
-  }
-  .field input, .field select {
-    font-family: 'DM Mono', monospace;
-    font-size: 20px;
-    font-weight: 500;
-    color: var(--text);
-    background: var(--surface-2);
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 10px 14px;
-    outline: none;
-    transition: border-color 0.15s, box-shadow 0.15s;
-    width: 100%;
-  }
-  .field input:focus, .field select:focus {
-    border-color: var(--accent-mid);
-    box-shadow: 0 0 0 3px rgba(91,155,214,0.15);
-    background: #fff;
-  }
-  .field input::placeholder { color: #b0bac6; font-weight: 400; }
-  .field input::-webkit-outer-spin-button,
-  .field input::-webkit-inner-spin-button { -webkit-appearance: none; }
-  .field input[type=number] { -moz-appearance: textfield; }
+  .field label { font-size: 13px; font-weight: 600; color: var(--text-2); }
+  .field input { font-family: 'DM Mono', monospace; font-size: 18px; background: var(--surface-2); border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 8px 12px; outline: none; width: 100%; }
 
-  .section-divider {
-    border: none;
-    border-top: 1px dashed var(--border);
-    margin: 22px 0;
-  }
+  .btn-primary { font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 600; padding: 14px 24px; border-radius: var(--radius-sm); border: none; cursor: pointer; background: var(--accent); color: #fff; width: 100%; margin-top: 24px; }
 
-  /* ── Buttons ── */
-  .btn {
-    font-family: 'Outfit', sans-serif;
-    font-size: 15px;
-    font-weight: 600;
-    padding: 11px 24px;
-    border-radius: var(--radius-sm);
-    border: none;
-    cursor: pointer;
-    transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
-  }
-  .btn:active { transform: scale(0.98); }
-  .btn-primary {
-    background: var(--accent);
-    color: #fff;
-    box-shadow: 0 1px 3px rgba(26,95,168,0.25);
-  }
-  .btn-primary:hover { background: #155290; box-shadow: 0 2px 8px rgba(26,95,168,0.35); }
-  .btn-ghost {
-    background: var(--surface-2);
-    color: var(--accent);
-    border: 1.5px solid var(--border);
-    font-size: 13px;
-    padding: 7px 14px;
-  }
-  .btn-ghost:hover { background: var(--accent-light); border-color: var(--accent-mid); }
+  #resultsCard { display: none; }
+  .results-header { font-size: 18px; font-weight: 700; border-bottom: 2px solid var(--border); padding-bottom: 12px; margin-bottom: 20px; }
+  .result-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--border); }
+  .result-info h3 { font-size: 14px; color: var(--text-2); font-weight: 600; }
+  .result-info p { font-size: 12px; color: var(--text-3); }
+  .result-value { font-family: 'DM Mono', monospace; font-size: 28px; font-weight: 700; color: var(--accent); }
 
-  /* ── Crop result grid ── */
-  .crop-result-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-    margin-top: 16px;
-  }
-  @media (max-width: 600px) { .crop-result-grid { grid-template-columns: 1fr 1fr; } }
-  .crop-val-box {
-    background: var(--surface-2);
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 12px 14px;
-  }
-  .crop-val-box .crop-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--text-3);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-  }
-  .crop-val-box .crop-value {
-    font-family: 'DM Mono', monospace;
-    font-size: 22px;
-    font-weight: 500;
-    color: var(--text);
-    margin-top: 2px;
-  }
-  .crop-val-box.highlight {
-    background: var(--accent-light);
-    border-color: var(--accent-mid);
-  }
-  .crop-val-box.highlight .crop-value { color: var(--accent); }
-
-  .autofill-row {
-    display: flex;
-    gap: 10px;
-    margin-top: 14px;
-    flex-wrap: wrap;
-  }
-
-  /* ── Results ── */
-  .results-block {
-    margin-top: 22px;
-    border-top: 1px solid var(--border);
-    padding-top: 22px;
-  }
-  .results-summary {
-    display: flex;
-    align-items: baseline;
-    gap: 16px;
-    margin-bottom: 18px;
-    flex-wrap: wrap;
-  }
-  .best-val {
-    font-family: 'DM Mono', monospace;
-    font-size: 38px;
-    font-weight: 500;
-    color: var(--accent);
-    letter-spacing: -0.02em;
-    line-height: 1;
-  }
-  .best-val .unit {
-    font-size: 16px;
-    color: var(--text-3);
-    margin-left: 2px;
-    font-weight: 400;
-  }
-  .best-delta {
-    font-size: 14px;
-    color: var(--text-2);
-  }
-  .best-delta.exact { color: var(--green); font-weight: 600; }
-  .results-label {
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--text-3);
-    margin-bottom: 10px;
-  }
-  .results-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 14px;
-  }
-  .results-table th {
-    text-align: left;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--text-3);
-    padding: 6px 12px;
-    border-bottom: 2px solid var(--border);
-    background: var(--surface-2);
-  }
-  .results-table td {
-    padding: 9px 12px;
-    border-bottom: 1px solid var(--border);
-    font-family: 'DM Mono', monospace;
-    font-size: 14px;
-    color: var(--text);
-    vertical-align: middle;
-  }
-  .results-table tr:last-child td { border-bottom: none; }
-  .results-table tr.row-best td { background: var(--accent-light); }
-  .results-table tr.row-best td:first-child {
-    border-left: 3px solid var(--accent);
-    padding-left: 9px;
-  }
-  .results-table td.val-result { color: var(--accent); font-weight: 500; font-size: 15px; }
-  .results-table td.val-delta { color: var(--text-3); font-size: 13px; }
-  .results-table td.val-exact { color: var(--green); font-weight: 600; font-size: 13px; }
-  .results-table td .ratio-small { color: var(--text-3); font-size: 12px; margin-left: 4px; }
-
-  .count-note {
-    font-size: 12.5px;
-    color: var(--text-3);
-    margin-bottom: 10px;
-  }
-
-  .error-box {
-    background: var(--red-bg);
-    border: 1px solid #f5a3a3;
-    border-radius: var(--radius-sm);
-    padding: 10px 14px;
-    font-size: 14px;
-    color: var(--red);
-    margin-top: 14px;
-    display: none;
-  }
+  .trim-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 12px; }
+  .trim-box { background: var(--surface-2); border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 10px; text-align: center; }
+  .trim-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text-3); }
+  .trim-val { font-family: 'DM Mono', monospace; font-size: 20px; font-weight: 700; }
+  .trim-note { font-size: 12px; color: var(--text-3); margin-top: 16px; font-style: italic; text-align: center; }
 </style>
 </head>
 <body>
+
 <div class="page-wrap">
-
-  <!-- Header -->
   <div class="page-header">
-    <h1>RetroTINK-4K <span>Decimation Calculator</span></h1>
-    <p>Calculate horizontal and vertical decimation settings, and crop values for CRT simulation.</p>
+    <h1>RetroTINK-4K <span>Decimation & Trim</span></h1>
+    <p>Unified calculator for perfect downscaling prior to applying CRT/LCD effects.</p>
   </div>
 
-  <!-- Preset bar -->
-  <div class="preset-bar">
-    <label>Preset</label>
-    <select disabled>
-      <option>— Select a preset —</option>
-    </select>
-    <span class="preset-badge">Coming Soon</span>
-  </div>
-
-  <!-- CARD 1: Crop Setup -->
   <div class="card">
-    <div class="card-header">
-      <span class="card-step">Step 1</span>
-      <span class="card-title">Crop Setup</span>
+    <div class="preset-section">
+      <label for="presetSelect">Configuration Profile</label>
+      <select id="presetSelect" onchange="handlePresetChange()">
+        <option value="custom">-- Custom Calculator --</option>
+        <option value="snes_nso">SNES - Switch Online (1080p Output)</option>
+        <option value="md_nso">Mega Drive/Genesis - Switch Online (1080p Output)</option>
+        <option value="n64_nso">N64 - Switch Online (720p Output)</option>
+        <option value="capcom_arcade">Capcom/Marvel/SF Arcade Collections (1080p Output)</option>
+        <option value="mvc2_arcade">Marvel vs. Capcom 2 - MVC Collection (1080p Output)</option>
+        <option value="capcom_beatemup">Capcom Beat 'Em Up Bundle (1080p Output)</option>
+      </select>
+      <div id="notesPanel" class="notes-box"></div>
     </div>
 
-    <div class="info-box">
-      <strong>Start with a full crop on your RT4K remote:</strong><br>
-      Press <span class="aux-btn">AUX2</span> for <strong>Full Crop to 4:3</strong>, or <span class="aux-btn">AUX3</span> for <strong>Full Crop to 16:9</strong>.<br>
-      Then carefully verify that the crop edges align exactly with the edges of your content — not the signal border. 
-      Adjust the H/V crop values on the RT4K until they match precisely.
-    </div>
-
-    <p style="font-size:14px; font-weight:600; color:var(--text-2); margin-bottom:14px;">
-      Calculate crop values from known resolutions
-    </p>
-
-    <div class="field-row cols-2">
-      <div class="field">
-        <label>Signal Width</label>
-        <div class="sublabel">Width of the incoming signal (px)</div>
-        <input type="number" id="sigW" placeholder="e.g. 1920" min="1">
-      </div>
-      <div class="field">
-        <label>Signal Height</label>
-        <div class="sublabel">Height of the incoming signal (px)</div>
-        <input type="number" id="sigH" placeholder="e.g. 1080" min="1">
-      </div>
-    </div>
-    <div class="field-row cols-2">
-      <div class="field">
-        <label>Content Width</label>
-        <div class="sublabel">Native horizontal resolution of your source</div>
-        <input type="number" id="cntW" placeholder="e.g. 256" min="1">
-      </div>
-      <div class="field">
-        <label>Content Height</label>
-        <div class="sublabel">Native vertical resolution of your source</div>
-        <input type="number" id="cntH" placeholder="e.g. 240" min="1">
-      </div>
-    </div>
-
-    <button class="btn btn-primary" onclick="calcCrop()">Calculate Crop Values</button>
-    <div class="error-box" id="cropError"></div>
-
-    <div id="cropResults" style="display:none">
-      <div class="crop-result-grid" id="cropGrid"></div>
-      <div class="autofill-row">
-        <button class="btn btn-ghost" onclick="autofillH()">&#8594; Use H.Samp as Horizontal Input</button>
-        <button class="btn btn-ghost" onclick="autofillV()">&#8594; Use V.Lines as Vertical Input</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- CARD 2: Horizontal Decimation -->
-  <div class="card">
-    <div class="card-header">
-      <span class="card-step">Step 2</span>
-      <span class="card-title">Horizontal Decimation</span>
-    </div>
-
-    <div class="field-row cols-2">
-      <div class="field">
-        <label>Cropped Horizontal Width</label>
-        <div class="sublabel">H.Samp value after cropping to exact content width</div>
-        <input type="number" id="hInput" placeholder="e.g. 341" min="1">
-      </div>
-      <div class="field">
-        <label>Target Horizontal Resolution</label>
-        <div class="sublabel">The output width you want to achieve</div>
-        <input type="number" id="hTarget" placeholder="e.g. 256" min="1">
-      </div>
-    </div>
-
-    <button class="btn btn-primary" onclick="calcH()">Calculate Horizontal Decimation</button>
-    <div class="error-box" id="hError"></div>
-    <div id="hResults" style="display:none" class="results-block">
-      <div class="results-summary">
-        <div>
-          <div style="font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-3);margin-bottom:4px;">Best Match</div>
-          <div class="best-val" id="hBestVal">—<span class="unit">px</span></div>
-        </div>
-        <div class="best-delta" id="hBestDelta"></div>
-      </div>
-      <div class="results-label">All Combinations — sorted by closeness</div>
-      <div class="count-note" id="hCount"></div>
-      <table class="results-table">
-        <thead>
-          <tr>
-            <th>Result (px)</th>
-            <th>Out Pixels / In Pixels</th>
-            <th>Ratio</th>
-            <th>Delta</th>
-          </tr>
-        </thead>
-        <tbody id="hTableBody"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- CARD 3: Vertical Decimation -->
-  <div class="card">
-    <div class="card-header">
-      <span class="card-step">Step 3</span>
-      <span class="card-title">Vertical Decimation</span>
-    </div>
-
-    <div class="info-box">
-      Vertical decimation uses simple integer divisors only: <strong>1/2, 1/3, 1/4 … up to 1/31</strong>.
-      Enter the cropped height (V.Lines after crop) and your desired target height.
-    </div>
-
-    <div class="field-row cols-2">
-      <div class="field">
-        <label>Cropped Vertical Height</label>
-        <div class="sublabel">V.Lines value after cropping to exact content height</div>
-        <input type="number" id="vInput" placeholder="e.g. 480" min="1">
-      </div>
-      <div class="field">
-        <label>Target Vertical Resolution</label>
-        <div class="sublabel">The output height you want to achieve</div>
-        <input type="number" id="vTarget" placeholder="e.g. 240" min="1">
-      </div>
-    </div>
-
-    <button class="btn btn-primary" onclick="calcV()">Calculate Vertical Decimation</button>
-    <div class="error-box" id="vError"></div>
-
-    <div id="vResults" style="display:none" class="results-block">
-      <div class="results-summary">
-        <div>
-          <div style="font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-3);margin-bottom:4px;">Best Match</div>
-          <div class="best-val" id="vBestVal">—<span class="unit">px</span></div>
-        </div>
-        <div class="best-delta" id="vBestDelta"></div>
-      </div>
-
+    <div id="calculatorInputs">
       <div class="warn-box">
-        <strong>Tip:</strong> If no close match is available, try changing the RT4K output resolution 
-        (e.g. switching between 1080p and 1200p) — a different output resolution may allow a better 
-        match. Re-enter your target value to compare results.
+        <strong>Tip:</strong> If auto-crop fails due to borders/GUIs, set the RetroTINK-4K <strong>Scaling Mode</strong> to <strong>"Auto Fill Integer"</strong> to help align manual crops.
       </div>
-
-      <div class="results-label" style="margin-top:18px;">All Divisors — sorted by closeness</div>
-      <table class="results-table">
-        <thead>
-          <tr>
-            <th>Result (px)</th>
-            <th>Setting</th>
-            <th>Delta</th>
-          </tr>
-        </thead>
-        <tbody id="vTableBody"></tbody>
-      </table>
+      <div class="section-label">1. Input Signal</div>
+      <div class="field-grid">
+        <div class="field"><label>Signal Width</label><input type="number" id="signalW" value="1920"></div>
+        <div class="field"><label>Signal Height</label><input type="number" id="signalH" value="1080"></div>
+      </div>
+      <div class="section-label">2. Active Content Area</div>
+      <div class="field-grid">
+        <div class="field"><label>Active Width</label><input type="number" id="cropW" placeholder="e.g. 1194"></div>
+        <div class="field"><label>Active Height</label><input type="number" id="cropH" placeholder="e.g. 896"></div>
+      </div>
+      <div class="section-label">3. Target Resolution</div>
+      <div class="field-grid">
+        <div class="field"><label>Target Width</label><input type="number" id="targetW" placeholder="e.g. 384"></div>
+        <div class="field"><label>Target Height</label><input type="number" id="targetV" placeholder="e.g. 224"></div>
+      </div>
+      <button class="btn-primary" onclick="calculate()">Calculate Settings</button>
     </div>
   </div>
 
-</div><!-- /page-wrap -->
+  <div class="card" id="resultsCard">
+    <div class="results-header">Optimal RetroTINK-4K Settings</div>
+    <div class="result-row">
+      <div class="result-info"><h3>Horizontal Decimation</h3><p id="hDesc"></p></div>
+      <div class="result-value" id="hValue"></div>
+    </div>
+    <div class="result-row">
+      <div class="result-info"><h3>Vertical Decimation</h3><p id="vDesc"></p></div>
+      <div class="result-value" id="vValue"></div>
+    </div>
+    <div class="result-row" style="display:block; border:none;">
+      <div class="result-info"><h3>Trim Settings</h3><p>Apply these to the full decimated signal.</p></div>
+      <div class="trim-grid">
+        <div class="trim-box"><div class="trim-label">Top</div><div class="trim-val" id="tT">0</div></div>
+        <div class="trim-box"><div class="trim-label">Bottom</div><div class="trim-val" id="tB">0</div></div>
+        <div class="trim-box"><div class="trim-label">Left</div><div class="trim-val" id="tL">0</div></div>
+        <div class="trim-box"><div class="trim-label">Right</div><div class="trim-val" id="tR">0</div></div>
+      </div>
+      <p class="trim-note">* Note: If the image is off-center by 1px, swap the Left/Right or Top/Bottom negative values.</p>
+    </div>
+  </div>
+</div>
 
 <script>
-  // ── Decimation tables (RT4K, 1–63) ──
-  const IN_PX  = Array.from({length:63},(_,i)=>i+1);
-  const OUT_PX = Array.from({length:63},(_,i)=>i+1);
+  const presets = {
+    "snes_nso": { sW: 1920, sH: 1080, cW: 1024, cH: 896, tW: 256, tV: 224, note: "<strong>NSO Settings:</strong> Switch to 1080p. In App: Filter 'Off', Display 'Pixel Perfect'." },
+    "md_nso": { sW: 1920, sH: 1080, cW: 1280, cH: 896, tW: 320, tV: 224, note: "<strong>NSO Settings:</strong> Switch to 1080p. In App: Filter 'Off', Display 'Pixel Perfect'." },
+    "n64_nso": { sW: 1280, sH: 720, cW: 960, cH: 720, tW: 320, tV: 240, note: "<strong>NSO Settings:</strong> Switch to 720p." },
+    "capcom_arcade": { sW: 1920, sH: 1080, cW: 1194.6, cH: 896, tW: 384, tV: 224, note: "<strong>Game Settings:</strong> 1080p Output. Border 'None'. Size 'Original'. Filter 'Off'. (For SF 30th, Capcom Fighting Coll. 1, & Marvel Collection Arcade Games EXCLUDING MvC2)." },
+    "mvc2_arcade": { sW: 1920, sH: 1080, cW: 1280, cH: 960, tW: 640, tV: 480, note: "<strong>Game Settings:</strong> 1080p Output. Border 'None'. Size 'Original'. Filter 'Off'. Specifically for Marvel vs. Capcom 2." },
+    "capcom_beatemup": { sW: 1920, sH: 1080, cW: 1228.8, cH: 896, tW: 384, tV: 224, note: "<strong>Game Settings:</strong> 1080p Output. Border 'None'. Size 'Original'. Filter 'Off'." }
+  };
 
-  function gcd(a,b){ return b===0?a:gcd(b,a%b); }
-
-  function showError(id, msg){
-    const el=document.getElementById(id);
-    el.textContent=msg; el.style.display='block';
-  }
-  function clearError(id){
-    const el=document.getElementById(id);
-    el.textContent=''; el.style.display='none';
-  }
-
-  // ── Crop Calculator ──
-  let lastCropW = null, lastCropH = null;
-
-  function calcCrop(){
-    clearError('cropError');
-    document.getElementById('cropResults').style.display='none';
-    const sw=parseInt(document.getElementById('sigW').value);
-    const sh=parseInt(document.getElementById('sigH').value);
-    const cw=parseInt(document.getElementById('cntW').value);
-    const ch=parseInt(document.getElementById('cntH').value);
-    if(!sw||!sh||!cw||!ch||sw<=0||sh<=0||cw<=0||ch<=0){
-      showError('cropError','Please enter all four resolution values.'); return;
+  function handlePresetChange() {
+    const sel = document.getElementById('presetSelect').value;
+    const calcDiv = document.getElementById('calculatorInputs');
+    const notes = document.getElementById('notesPanel');
+    
+    if (sel === 'custom') {
+      calcDiv.style.display = 'block';
+      notes.style.display = 'none';
+      document.getElementById('resultsCard').style.display = 'none';
+    } else {
+      calcDiv.style.display = 'none';
+      const p = presets[sel];
+      document.getElementById('signalW').value = p.sW;
+      document.getElementById('signalH').value = p.sH;
+      document.getElementById('cropW').value = p.cW;
+      document.getElementById('cropH').value = p.cH;
+      document.getElementById('targetW').value = p.tW;
+      document.getElementById('targetV').value = p.tV;
+      notes.innerHTML = p.note;
+      notes.style.display = 'block';
+      calculate();
     }
-    if(cw>sw||ch>sh){
-      showError('cropError','Content resolution cannot exceed signal resolution.'); return;
-    }
-    const hStart = (sw-cw)/2;
-    const vStart = (sh-ch)/2;
-    lastCropW = cw; lastCropH = ch;
-
-    const grid = document.getElementById('cropGrid');
-    const vals = [
-      {label:'H.Start', val: hStart, note: hStart===Math.floor(hStart)?null:'Round to '+Math.round(hStart), hi:false},
-      {label:'H.Samp', val: cw, note:'= content width', hi:true},
-      {label:'V.Start', val: vStart, note: vStart===Math.floor(vStart)?null:'Round to '+Math.round(vStart), hi:false},
-      {label:'V.Lines', val: ch, note:'= content height', hi:true},
-    ];
-    grid.innerHTML = vals.map(v=>`
-      <div class="crop-val-box${v.hi?' highlight':''}">
-        <div class="crop-label">${v.label}</div>
-        <div class="crop-value">${typeof v.val==='number'&&v.val!==Math.floor(v.val)?v.val.toFixed(1):v.val}</div>
-        ${v.note?`<div style="font-size:12px;color:var(--text-3);margin-top:2px;">${v.note}</div>`:''}
-      </div>
-    `).join('');
-    document.getElementById('cropResults').style.display='block';
   }
 
-  function autofillH(){
-    if(lastCropW) document.getElementById('hInput').value=lastCropW;
-  }
-  function autofillV(){
-    if(lastCropH) document.getElementById('vInput').value=lastCropH;
-  }
+  function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
 
-  // ── Horizontal Decimation ──
-  function calcH(){
-    clearError('hError');
-    document.getElementById('hResults').style.display='none';
-    const orig=parseFloat(document.getElementById('hInput').value);
-    const tgt=parseFloat(document.getElementById('hTarget').value);
-    if(!orig||!tgt||orig<=0||tgt<=0){
-      showError('hError','Please enter valid values for both fields.'); return;
-    }
+  function calculate() {
+    const sel = document.getElementById('presetSelect').value;
+    const sW = parseFloat(document.getElementById('signalW').value);
+    const sH = parseFloat(document.getElementById('signalH').value);
+    const cW = parseFloat(document.getElementById('cropW').value);
+    const cH = parseFloat(document.getElementById('cropH').value);
+    const tW = parseFloat(document.getElementById('targetW').value);
+    const tV = parseFloat(document.getElementById('targetV').value);
 
-    const combos=[];
-    for(const inp of IN_PX){
-      for(const out of OUT_PX){
-        if(out>inp) continue;
-        const res=orig*(out/inp);
-        combos.push({inp,out,res,delta:Math.abs(res-tgt)});
+    let bH = {delta: Infinity};
+    for (let inp=1; inp<=63; inp++) {
+      for (let out=1; out<=inp; out++) {
+        let res = cW * (out/inp);
+        let d = Math.abs(res - tW);
+        if (d < bH.delta) bH = {out, inp, res, delta: d};
       }
     }
-    combos.sort((a,b)=>a.delta-b.delta||a.inp-b.inp);
 
-    // Dedupe by reduced ratio
-    const seen=new Set(), unique=[];
-    for(const c of combos){
-      const g=gcd(c.out,c.inp);
-      const key=(c.out/g)+'/'+(c.inp/g);
-      if(!seen.has(key)){ seen.add(key); unique.push({...c,rOut:c.out/g,rInp:c.inp/g}); }
+    let bV = {delta: Infinity};
+    for (let n=1; n<=31; n++) {
+      let res = cH / n;
+      let d = Math.abs(res - tV);
+      if (d < bV.delta) bV = {n, res, delta: d};
     }
 
-    const best=unique[0];
-    document.getElementById('hBestVal').innerHTML=
-      Math.round(best.res*100)/100+'<span class="unit"> px</span>';
-    const dEl=document.getElementById('hBestDelta');
-    if(best.delta<0.01){ dEl.textContent='Exact match'; dEl.className='best-delta exact'; }
-    else { dEl.textContent='Δ '+best.delta.toFixed(2)+' px from target ('+tgt+' px)'; dEl.className='best-delta'; }
+    const g = gcd(bH.out, bH.inp);
+    const fW = Math.round(sW * (bH.out/bH.inp));
+    const fH = Math.round(sH / bV.n);
 
-    document.getElementById('hCount').textContent=
-      unique.length+' unique combination'+(unique.length!==1?'s':'')+' found';
+    document.getElementById('hValue').textContent = (bH.inp/g) + '/' + (bH.out/g);
+    document.getElementById('vValue').textContent = '1/' + bV.n;
+    document.getElementById('hDesc').innerHTML = `Decimates signal to <b>${fW}px</b> width.`;
+    document.getElementById('vDesc').innerHTML = `Decimates signal to <b>${fH}px</b> height.`;
 
-    const tbody=document.getElementById('hTableBody');
-    tbody.innerHTML='';
-    unique.forEach(r=>{
-      const isBest=r.delta===best.delta;
-      const res=Math.round(r.res*100)/100;
-      const deltaStr=r.delta<0.005?'exact':'Δ '+r.delta.toFixed(2);
-      const isSame=(r.rInp===r.inp&&r.rOut===r.out);
-      const ratioStr=r.rOut+'/'+r.rInp+(isSame?'':' <span class="ratio-small">('+r.out+'/'+r.inp+')</span>');
-      const fracStr=r.rOut+' / '+r.rInp;
-      const tr=document.createElement('tr');
-      if(isBest) tr.className='row-best';
-      tr.innerHTML=
-        '<td class="val-result">'+res+'</td>'+
-        '<td style="font-family:\'DM Mono\',monospace">'+fracStr+'</td>'+
-        '<td style="font-family:\'DM Mono\',monospace;color:var(--text-2)">'+r.rOut+'/'+r.rInp+'</td>'+
-        '<td class="'+(r.delta<0.005?'val-exact':'val-delta')+'">'+deltaStr+'</td>';
-      tbody.appendChild(tr);
-    });
-
-    document.getElementById('hResults').style.display='block';
+    if (sel === 'n64_nso') {
+        setTrims("-54", "-52", "0", "0");
+    } else if (sel === 'capcom_arcade') {
+        setTrims("-117", "-116", "-23", "-23");
+    } else if (sel === 'mvc2_arcade') {
+        setTrims("-160", "-160", "-30", "-30");
+    } else if (sel === 'snes_nso') {
+        setTrims("-112", "-112", "-23", "-23");
+    } else if (sel === 'md_nso') {
+        setTrims("-80", "-80", "-23", "-23");
+    } else if (sel === 'capcom_beatemup') {
+        setTrims("-108", "-108", "-23", "-23");
+    } else {
+        const hTrim = Math.max(0, fW - tW);
+        const vTrim = Math.max(0, fH - tV);
+        setTrims("-" + Math.floor(hTrim/2), "-" + Math.ceil(hTrim/2), "-" + Math.floor(vTrim/2), "-" + Math.ceil(vTrim/2));
+    }
+    document.getElementById('resultsCard').style.display = 'block';
   }
 
-  // ── Vertical Decimation ──
-  function calcV(){
-    clearError('vError');
-    document.getElementById('vResults').style.display='none';
-    const orig=parseFloat(document.getElementById('vInput').value);
-    const tgt=parseFloat(document.getElementById('vTarget').value);
-    if(!orig||!tgt||orig<=0||tgt<=0){
-      showError('vError','Please enter valid values for both fields.'); return;
-    }
-
-    // Divisors 2..31 only
-    const combos=[];
-    for(let n=2;n<=31;n++){
-      const res=orig/n;
-      combos.push({n,res,delta:Math.abs(res-tgt)});
-    }
-    combos.sort((a,b)=>a.delta-b.delta);
-
-    const best=combos[0];
-    document.getElementById('vBestVal').innerHTML=
-      Math.round(best.res*100)/100+'<span class="unit"> px</span>';
-    const dEl=document.getElementById('vBestDelta');
-    if(best.delta<0.01){ dEl.textContent='Exact match'; dEl.className='best-delta exact'; }
-    else { dEl.textContent='Δ '+best.delta.toFixed(2)+' px from target ('+tgt+' px)'; dEl.className='best-delta'; }
-
-    const tbody=document.getElementById('vTableBody');
-    tbody.innerHTML='';
-    combos.forEach(r=>{
-      const isBest=r.delta===best.delta;
-      const res=Math.round(r.res*100)/100;
-      const deltaStr=r.delta<0.005?'exact':'Δ '+r.delta.toFixed(2);
-      const tr=document.createElement('tr');
-      if(isBest) tr.className='row-best';
-      tr.innerHTML=
-        '<td class="val-result">'+res+'</td>'+
-        '<td style="font-family:\'DM Mono\',monospace">1/'+r.n+'</td>'+
-        '<td class="'+(r.delta<0.005?'val-exact':'val-delta')+'">'+deltaStr+'</td>';
-      tbody.appendChild(tr);
-    });
-
-    document.getElementById('vResults').style.display='block';
+  function setTrims(l, r, t, b) {
+    document.getElementById('tL').textContent = l;
+    document.getElementById('tR').textContent = r;
+    document.getElementById('tT').textContent = t;
+    document.getElementById('tB').textContent = b;
   }
-
-  // Enter key support
-  document.addEventListener('keydown',function(e){
-    if(e.key!=='Enter') return;
-    const focused=document.activeElement;
-    if(!focused) return;
-    const id=focused.id;
-    if(['sigW','sigH','cntW','cntH'].includes(id)) calcCrop();
-    else if(['hInput','hTarget'].includes(id)) calcH();
-    else if(['vInput','vTarget'].includes(id)) calcV();
-  });
 </script>
 </body>
 </html>
